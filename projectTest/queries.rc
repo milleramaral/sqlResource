@@ -1,0 +1,2 @@
+TfrmMainSqlCnsTable DEVARTINTERBASE ./queries/TfrmMainSqlCnsTable.DevartInterBase.sql
+TfrmMainSqlCnsTable DEVARTPOSTGRESQL ./queries/TfrmMainSqlCnsTable.DevartPostgreSQL.sql

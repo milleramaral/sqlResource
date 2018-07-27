@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{0F0A54BD-DA01-43CF-B6E3-634F1F062572}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="projectTest\SqlResourceTest.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="SqlResourceComponent.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="SqlResourceTest">
+        <MSBuild Projects="projectTest\SqlResourceTest.dproj"/>
+    </Target>
+    <Target Name="SqlResourceTest:Clean">
+        <MSBuild Projects="projectTest\SqlResourceTest.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="SqlResourceTest:Make">
+        <MSBuild Projects="projectTest\SqlResourceTest.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="SqlResourceComponent">
+        <MSBuild Projects="SqlResourceComponent.dproj"/>
+    </Target>
+    <Target Name="SqlResourceComponent:Clean">
+        <MSBuild Projects="SqlResourceComponent.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="SqlResourceComponent:Make">
+        <MSBuild Projects="SqlResourceComponent.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="SqlResourceTest;SqlResourceComponent"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="SqlResourceTest:Clean;SqlResourceComponent:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="SqlResourceTest:Make;SqlResourceComponent:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
