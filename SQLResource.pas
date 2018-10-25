@@ -147,6 +147,7 @@ end;
 function TSQLResource.ExecSQL(ExecDirect: Boolean): Integer;
 begin
   CommandText := getSql;
+  loadInitialParameters;
   Result := inherited ExecSQL(ExecDirect);
 end;
 
