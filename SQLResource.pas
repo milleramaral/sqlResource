@@ -24,6 +24,7 @@ type
     FDesignerFolderName: string;
     FOnResourceNotFound: TOnResourceNotFoundEvent;
     FForceResourceName: string;
+    FForceLoadFile: string;
 
     function resourceFilePath: string;
     function getDesignerFile: string;
@@ -34,6 +35,8 @@ type
     function DesignerFolderNameIsStored: Boolean;
     procedure SetForceResourceName(const Value: string);
     function forceResourceNameIsStored: Boolean;
+    procedure SetForceLoadFile(const Value: string);
+    function forceLoadFileIsStored: Boolean;
 
   protected // Custom
     function GetFromPosition(SqlClause: string): Integer; virtual;
@@ -66,6 +69,7 @@ type
 
     property ResourceName: string read getResourceName;
     property ForceResourceName: string read FForceResourceName write SetForceResourceName stored forceResourceNameIsStored;
+    property ForceLoadFile: string read FForceLoadFile write SetForceLoadFile stored forceLoadFileIsStored;
 
     property ResourceType: string read getResourceType;
     property Sql: string read getSql;
@@ -173,8 +177,19 @@ begin
   else result := self.SQLConnection.DriverName;
 end;
 
+procedure TSQLResource.SetForceLoadFile(const Value: string);
+begin
+  if Trim(Value) <> '' then
+    ForceResourceName := '';
+
+  FForceLoadFile := Trim(Value);
+end;
+
 procedure TSQLResource.SetForceResourceName(const Value: string);
 begin
+  if Trim(Value) <> '' then
+    ForceLoadFile := '';
+
   FForceResourceName := Trim(Value);
 end;
 
@@ -198,30 +213,36 @@ begin
   end;
 end;
 
+function loadFromFile(AFileName: string): string;
+var
+  sqlFile: TStringList;
+begin
+  if (FileExists(AFileName)) then
+  begin
+    sqlFile := TStringList.Create;
+    try
+      sqlFile.LoadFromFile(AFileName);
+      Result := sqlFile.Text;
+    finally
+      FreeAndNil(sqlFile);
+    end;
+  end
+  else Result := Format('file "%s" not found.', [AFileName]);
+end;
+
 function TSQLResource.loadSql: string;
 var
   sqlFile: TStringList;
 begin
   Result := '';
-  if (csDesigning in ComponentState) then
-  begin
-    if (ResourceType.IsEmpty) then
-      Result := DesignerFile
-    else if (FileExists(getDesignerFile)) then
-    begin
-      sqlFile := TStringList.Create;
-      try
-        sqlFile.LoadFromFile(getDesignerFile);
-        Result := sqlFile.Text;
-      finally
-        FreeAndNil(sqlFile);
-      end;
-    end
-    else Result := Format('file "%s" not found.', [getDesignerFile]);
-  end
-  else begin
-    Result := LoadResourceString(resourceName, resourceType);
-  end;
+
+  if resourceType.IsEmpty then
+    result := 'set the property "resourceType"'
+  else if (FForceLoadFile <> '') then
+      result := loadFromFile(FForceLoadFile)
+  else if (csDesigning in ComponentState) then
+    result := loadFromFile(DesignerFile)
+  else Result := LoadResourceString(resourceName, resourceType);
 end;
 
 procedure TSQLResource.OpenCursor(InfoQuery: Boolean);
@@ -348,14 +369,21 @@ end;
 
 function TSQLResource.getResourceName: string;
 begin
-  if FForceResourceName = '' then
-  begin
+  if FForceLoadFile <> '' then
+    result := ''
+  else if FForceResourceName <> '' then
+    Result := FForceResourceName
+  else begin
     Result := Format('%s%s', [
       Owner.ClassName,
       Name
     ]);
-  end
-  else Result := FForceResourceName;
+  end;
+end;
+
+function TSQLResource.forceLoadFileIsStored: Boolean;
+begin
+  Result := FForceLoadFile <> '';
 end;
 
 function TSQLResource.forceResourceNameIsStored: Boolean;
