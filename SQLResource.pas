@@ -231,8 +231,6 @@ begin
 end;
 
 function TSQLResource.loadSql: string;
-var
-  sqlFile: TStringList;
 begin
   Result := '';
 
